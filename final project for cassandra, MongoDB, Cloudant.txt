@@ -1,0 +1,145 @@
+npm install -g couchimport@1.4.0
+couchimport --version
+wget https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu1804-x86_64-100.3.1.tgz
+tar -xf mongodb-database-tools-ubuntu1804-x86_64-100.3.1.tgz
+export PATH=$PATH:/home/project/mongodb-database-tools-ubuntu1804-x86_64-100.3.1/bin
+echo "done"
+
+mongoimport --version
+
+export CLOUDANTURL="YOUR_URL_HERE"
+couchexport --url $CLOUDANTURL --db diamonds --delimiter ","
+couchexport --url $CLOUDANTURL --db diamonds --type jsonl
+couchexport --url $CLOUDANTURL --db diamonds --type jsonl > diamonds.json
+couchexport --url $CLOUDANTURL --db diamonds --delimiter "," > diamonds.csv
+
+export CLOUDANTURL="https://apikey-v2-5s3xoarvzndzm325n8xoiqme3kaqm3r3z61ez55orj6:3ff467cc2bfd9a9f60e3c75767178815@aaa493be-c9f1-4fdf-a38e-10ad5ed10d07-bluemix.cloudantnosqldb.appdomain.cloud"
+
+curl -XPOST $CLOUDANTURL/movies/_bulk_docs -Hcontent-type:application/json -d @movie.json
+
+"QiQrh1q0MwopA0khbKicCRM6zWP7l7kh2Dp5I43gtaG0"
+ 
+curl -X POST $CLOUDANTURL/movies/_index \
+-H"Content-Type: application/json" \
+-d'{
+    "index": {
+        "fields": ["Director"]
+    }
+}'
+
+curl -X POST $CLOUDANTURL/movies/_find \
+-H"Content-Type: application/json" \
+-d'{ "selector":
+        {
+            "Director":"Richard Gage"
+        }
+    }'
+
+
+curl -X POST $CLOUDANTURL/movies/_index \
+-H"Content-Type: application/json" \
+-d'{
+    "index": {
+        "fields": ["title"]
+    }
+}'
+
+
+curl -X POST $CLOUDANTURL/movies/_find \
+-H "Content-Type: application/json" \
+-d '{ "selector":
+        {
+            "title": "Top Dog"
+        },
+        "fields": ["year", "Director"]
+    }'
+
+
+
+couchexport --url $CLOUDANTURL --db movies --type jsonl > movies.json
+
+start_mongo
+
+CONTAINER ID   IMAGE                           COMMAND                  CREATED          STATUS                          PORTS                                                                                  NAMES
+4d66b6b7d125   mongo-express:0.54.0            "tini -- /docker-ent…"   19 minutes ago   Created                                                                                                                mongo-mongo-express-1
+c7a1a8409531   mongo:3.6.3                     "docker-entrypoint.s…"   19 minutes ago   Restarting (1) 29 seconds ago                                                                                          mongo-mongo-1
+f64089511db7   bitnami/cassandra:3-debian-10   "/opt/bitnami/script…"   2 hours ago      Up 2 hours (healthy)            0.0.0.0:7000->7000/tcp, :::7000->7000/tcp, 0.0.0.0:9042->9042/tcp, :::9042->9042/tcp   cassandra-cassandra-1
+
+docker container stop c7a1a8409531
+docker container rm b99c072c5cb1 c7a1a8409531 
+docker container rm f64089511db7
+docker container ps -a
+
+start_mongo
+mongo -u root -p MzI0MDctbWVuZ2pp --authenticationDatabase admin local
+
+Import ‘movies.json’ into mongodb server into a database named ‘entertainment’ and a collection named ‘movies’
+mongoimport -u root -p MzI0MDctbWVuZ2pp --authenticationDatabase admin --db entertainment --collection movies --file movies.json
+
+Write a mongodb query to find the year in which most number of movies were released
+
+use entertainment
+show collections
+db.movies.aggregate([
+    {
+        "$group": {
+            "_id": "$year",
+            "moviecount": { "$sum": 1 }
+        }
+    },
+    {
+        "$sort": { "moviecount": -1 }
+    },
+    {
+        "$limit": 1
+    }
+])
+
+Write a mongodb query to find the count of movies released after the year 1999
+db.movies.find({ "year": 2007 }).avg("Votes")
+
+db.movies.aggregate([
+  {
+    $match: {
+      year: 2007
+    }
+  },
+  {
+    $group: {
+      _id: "2007 average votes",
+      averageVotes: {
+        $avg: "$Votes"
+      }
+    }
+  }
+])
+
+
+Export the fields _id, “title”, “year”, “rating” and “director” from the ‘movies’ collection into a file named partial_data.csv
+
+Ctrl + D
+mongoexport -u root -p MzI0MDctbWVuZ2pp --authenticationDatabase admin --db entertainment --collection movies --out partial_data.csv --type=csv --fields _id,title,year,rating,director
+
+
+start_cassandra
+cqlsh --username cassandra --password MjM0NTUtbWVuZ2pp
+
+DESCRIBE KEYSPACES
+
+CREATE KEYSPACE entertainment  
+WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 3};
+
+use entertainment; 
+CREATE TABLE movies(
+id text PRIMARY KEY,
+title text,
+year text,
+rating text,
+Director text
+);
+
+COPY entertainment.movies(id,title,year,rating,Director) FROM 'partial_data.csv' WITH DELIMITER=',' AND HEADER=TRUE;
+CREATE INDEX rating_index ON movies(rating)
+ SELECT count(*) FROM entertainment.movies;
+SELECT COUNT(*) FROM movies WHERE rating = 'G';
+
