@@ -9,4 +9,6 @@ Creating a repository for coding samples from my study including SQL, Python, ET
 [Apache Airflow DAG Data Flow](https://github.com/mengjin2211/sample-work/blob/main/code/DAG%20ETL_Server_Access_Log_Processing..txt)  
 [NoSQL Cassandra, MongoDB, Claudant](https://github.com/mengjin2211/sample-work/blob/main/code/final%20project%20for%20cassandra%2C%20MongoDB%2C%20Cloudant.txt)  
 [Spark ML](https://github.com/mengjin2211/sample-work/blob/main/code/spark%20ML%20sample.ipynb)  
+[KNN Classification](https://github.com/mengjin2211/sample-work/blob/main/code/KNN%20Model.ipynb)  
+[K-Means](https://github.com/mengjin2211/sample-work/blob/main/code/K-Means-Customer-Seg.jupyterlite.ipynb)    
  
