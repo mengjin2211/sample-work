@@ -1,0 +1,207 @@
+# At the request of a friend, I did analysis of NASDAQ data trend as well as other tickers to assist with investment decision.
+
+import yfinance as yf
+import matplotlib.pyplot as plt
+
+# Get the data for NASDAQ index
+nasdaq = yf.Ticker("^IXIC").history(period="5y")
+
+# Get the data for S&P 500 index
+sp500 = yf.Ticker("^GSPC").history(period="5y")
+
+# Plot the line charts for open and close prices of NASDAQ
+plt.figure(figsize=(20, 10))
+plt.plot(nasdaq['Open'], label='NASDAQ Open Price')
+plt.plot(nasdaq['Close'], label='NASDAQ Close Price')
+plt.title("NASDAQ Open and Close Prices (Last 5 Years)")
+plt.xlabel("Year")
+plt.ylabel("Price")
+plt.legend()
+plt.show()
+
+# Plot the line charts for open and close prices of S&P 500
+plt.figure(figsize=(20, 10))
+plt.plot(sp500['Open'], label='S&P 500 Open Price')
+plt.plot(sp500['Close'], label='S&P 500 Close Price')
+plt.title("S&P 500 Open and Close Prices (Last 5 Years)")
+plt.xlabel("Year")
+plt.ylabel("Price")
+plt.legend()
+plt.show()
+
+import yfinance as yf
+import pandas as pd
+
+# Get the historical data for the two tickers
+nasdaq = yf.Ticker("^IXIC").history(period="5y")
+sp500 = yf.Ticker("^GSPC").history(period="5y")
+
+# Create a dataframe for each ticker
+nasdaq_df = pd.DataFrame(nasdaq)
+sp500_df = pd.DataFrame(sp500)
+
+nasdaq_df['Date'] = nasdaq_df.index
+sp500_df['Date'] = sp500_df.index
+
+# Display the data in a table
+nasdaq_df[['Date',"Open", "Close"]].to_csv("C:\\Users\\chaid\\Desktop\\nasdaq_stocks.csv", index=False)
+sp500_df[['Date',"Open", "Close"]].to_csv("C:\\Users\\chaid\\Desktop\\sp500_stocks.csv", index=False)
+
+import yfinance as yf
+import pandas as pd
+
+# Get QQQ data for 5 years
+qqq = yf.Ticker("QQQ").history(period="5y")
+
+# Select only the desired columns
+qqq_df = qqq[['Open', 'High', 'Low', 'Close']]
+
+# Add the date column to the dataframe
+qqq_df['Date'] = qqq_df.index
+
+# Export the dataframe to an Excel file
+qqq_df.to_excel("qqq_5y.xlsx", index=False)
+
+import yfinance as yf
+import pandas as pd
+
+# Get the historical data for the two tickers
+nasdaq = yf.Ticker("^IXIC").history(period="5y")
+sp500 = yf.Ticker("^GSPC").history(period="5y")
+
+# Create a dataframe for each ticker
+nasdaq_df = pd.DataFrame(nasdaq)
+sp500_df = pd.DataFrame(sp500)
+
+nasdaq_df['Date'] = nasdaq_df.index
+sp500_df['Date'] = sp500_df.index
+
+# Get the first trading day after Jan 1 2022
+first_trading_day = nasdaq_df[nasdaq_df['Date'] >= '2022-01-01'].index[0]
+
+# Initialize the starting amount and cash balance
+starting_amount = 100000
+cash_balance = starting_amount
+hold_position = 0
+
+# Loop through the data from the first trading day
+for i, row in nasdaq_df[nasdaq_df['Date'] >= first_trading_day].iterrows():
+    open_price = row['Open']
+    close_price = row['Close']
+
+    if hold_position == 0:
+        # If no position, sell a put
+        transaction = "Sell Put"
+        strike_price = round(open_price)
+        if close_price < strike_price:
+            # Buy at the strike price and deduct from starting amount
+            hold_position = strike_price
+            cash_balance -= strike_price
+            # Add 0.004*strike_price to cash balance
+            cash_balance += 0.004 * strike_price
+    else:
+        # If there is a position, sell a call
+        transaction = "Sell Call"
+        strike_price = round(open_price)
+        if strike_price < close_price:
+            # If strike_price < close_price, release the position
+            hold_position = 0
+            cash_balance += strike_price
+            # Add 0.004*strike_price to cash balance
+            cash_balance += 0.004 * strike_price
+
+print("Starting Amount:", starting_amount)
+print("Cash Balance:", cash_balance)
+print("Hold Position:", hold_position)
+
+import yfinance as yf
+import pandas as pd
+
+# Get the historical data for the two tickers
+nasdaq = yf.Ticker("QQQ").history(period="5y")
+
+# Create a dataframe for each ticker
+nasdaq_df = pd.DataFrame(nasdaq)
+
+# Add the date column to the dataframe
+nasdaq_df['Date'] = nasdaq_df.index
+
+import math
+
+# Define the initial variables
+cash_balance = 1000
+hold_position = 0
+
+# Initialize the list to store the balances
+net_asset = []
+balances=[]
+
+# Iterate through each row of the dataframe
+for i, row in nasdaq_df.iterrows():
+    open_price = row['Open']
+    close_price = row['Close']
+    date = row['Date']
+    strikeprice_p = math.floor(open_price)
+    strikeprice_c = math.ceil(open_price)
+    # Determine the trade type and strike price
+    if hold_position == 0:
+        trade_type = 'Sell Put'
+        if strikeprice_p <= close_price:
+            hold_position = 0
+            holding=0
+            cash_balance = cash_balance+strikeprice_p*0.004
+            asset=holding+cash_balance
+            net_asset.append(asset)
+             
+        else:
+            hold_position =1
+            holding=close_price
+            cash_balance = cash_balance-strikeprice_p+strikeprice_p*0.004
+        
+            asset=holding+cash_balance
+            net_asset.append(asset)
+        
+    else:
+        trade_type = 'Sell Call'
+        if strikeprice_c < close_price:
+            hold_position = 0
+            holding=0
+            cash_balance =cash_balance+strikeprice_c+strikeprice_c*0.004
+            asset=holding+cash_balance
+            net_asset.append(asset)
+        else:
+            hold_position = 1
+            holding=close_price
+            cash_balance =cash_balance+strikeprice_c*0.004
+            asset=holding+cash_balance
+            net_asset.append(asset)
+      
+    # Append the balance and date to the list
+    balances.append({'Date': date, 'Balance': asset, 'Holding': holding, 'Hold_position': hold_position})
+
+# Create the final dataframe
+result_df = pd.DataFrame(balances)
+     
+# Display the result
+print(result_df)
+
+import yfinance as yf
+import matplotlib.pyplot as plt
+
+# Define the list of stock tickers
+tickers = ['HQU.TO', 'HSD.TO', 'HSU.TO', 'ZDJ.TO', 'ZRE.TO', 'ZGRO.TO', 'ZGQ.TO', 'ZEM.TO', 'ZUQ.TO', 'ZQQ.TO', 'ZNQ.TO', 'ZSP.TO', 'FGGE.TO', 'XIU.TO']
+
+# Download the historical data of the stocks for the last 13 months
+data = yf.download(tickers, period='15mo')['Adj Close']
+
+# Calculate the daily returns of the stocks
+returns = data.pct_change()
+
+# Generate individual charts for each stock ticker
+for ticker in tickers:
+    plt.figure(figsize=(8, 4))
+    plt.plot(returns[ticker].rolling(window=30).mean())
+    plt.title(f'Trendline of {ticker} (Last 13 Months)')
+    plt.xlabel('Date')
+    plt.ylabel('Daily Returns')
+    plt.show()
