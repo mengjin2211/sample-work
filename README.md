@@ -11,4 +11,5 @@ Creating a repository for coding samples from my study including SQL, Python, ET
 [Spark ML](https://github.com/mengjin2211/sample-work/blob/main/code/spark%20ML%20sample.ipynb)  
 [KNN Classification](https://github.com/mengjin2211/sample-work/blob/main/code/KNN%20Model.ipynb)  
 [K-Means](https://github.com/mengjin2211/sample-work/blob/main/code/K-Means-Customer-Seg.jupyterlite.ipynb)    
+[SpaceX Data Visualization](https://github.com/mengjin2211/sample-work/blob/main/code/SpaceX%20Data%20Visualization.ipynb)   
  
